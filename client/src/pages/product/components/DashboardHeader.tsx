@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { LogOut, Package, Plus, User } from "lucide-react";
+import { LogOut, Package, Plus } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useShallow } from "zustand/react/shallow";
@@ -44,7 +44,6 @@ export function DashboardHeader({ onAddProduct }: DashboardHeaderProps) {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdown on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (
@@ -58,7 +57,6 @@ export function DashboardHeader({ onAddProduct }: DashboardHeaderProps) {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  // Close on Escape
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Escape") setOpen(false);
@@ -130,7 +128,7 @@ export function DashboardHeader({ onAddProduct }: DashboardHeaderProps) {
               >
                 {initials}
               </div>
-              {/* Name — hidden on small screens */}
+              {/* Name */}
               <span className="hidden max-w-[100px] truncate text-sm font-semibold text-slate-700 sm:block">
                 {fullName ?? "User"}
               </span>
@@ -182,24 +180,8 @@ export function DashboardHeader({ onAddProduct }: DashboardHeaderProps) {
                       </div>
                     </div>
 
-                    {/* Divider */}
-                    <div className="h-px bg-slate-100" />
-
-                    {/* Menu items */}
+                    {/* Sign out button — directly after user info, no profile button */}
                     <div className="p-1.5">
-                      <button
-                        onClick={() => setOpen(false)}
-                        className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-slate-600 transition hover:bg-slate-50"
-                      >
-                        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100">
-                          <User className="h-3.5 w-3.5 text-slate-500" />
-                        </div>
-                        <span className="font-medium">My Profile</span>
-                      </button>
-
-                      {/* Divider */}
-                      <div className="my-1 h-px bg-slate-100" />
-
                       <motion.button
                         onClick={handleSignOut}
                         className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-red-500 transition hover:bg-red-50"

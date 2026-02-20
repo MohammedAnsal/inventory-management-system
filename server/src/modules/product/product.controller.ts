@@ -32,13 +32,22 @@ export const getAll = async (
   next: NextFunction,
 ) => {
   try {
-    const products = await productService.getAllProducts(
+    const page = req.query.page ? Number(req.query.page) : 1;
+    const limit = req.query.limit ? Number(req.query.limit) : 10;
+    const search =
+      typeof req.query.search === "string" ? req.query.search : undefined;
+
+    const { products, pagination } = await productService.getAllProducts(
       req.user!.id.toString(),
+      page,
+      limit,
+      search,
     );
 
     res.status(HttpStatus.OK).json({
       success: true,
       data: products,
+      pagination,
     });
   } catch (error) {
     next(error);

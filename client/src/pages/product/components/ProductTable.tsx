@@ -202,7 +202,7 @@ export function ProductTable({
                     {formatDate(product.createdAt)}
                   </td>
                   <td className="px-5 py-4">
-                    <div className="flex items-center gap-2 opacity-0 transition-opacity group-hover:opacity-100">
+                    <div className="flex items-center gap-2">
                       <motion.button
                         onClick={() => onEdit(product)}
                         className="rounded-lg border border-slate-200 p-1.5 text-slate-400 transition hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-600"

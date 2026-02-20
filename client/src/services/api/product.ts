@@ -29,18 +29,46 @@ export interface ProductPayload {
   quantity: number;
 }
 
+export interface ProductPagination {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface GetProductsParams {
+  page: number;
+  limit: number;
+  search?: string;
+}
+
+export interface GetProductsResponse {
+  success: boolean;
+  data: Product[];
+  pagination: ProductPagination;
+}
+
 /**
  * GET ALL PRODUCTS
  */
-export const getProducts = async () => {
+export const getProducts = async ({
+  page,
+  limit,
+  search,
+}: GetProductsParams): Promise<GetProductsResponse> => {
   try {
     const response = await productApi.get("/api/products", {
+      params: {
+        page,
+        limit,
+        search: search || undefined,
+      },
       headers: {
         Authorization: `Bearer ${localStorage.getItem("access-token")}`,
       },
     });
 
-    return handleResponse(response.data.data, "Error fetching products");
+    return handleResponse(response.data, "Error fetching products");
   } catch (error) {
     handleError(error);
   }

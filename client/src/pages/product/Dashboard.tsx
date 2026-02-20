@@ -157,8 +157,8 @@
 // }
 
 import { AnimatePresence, motion } from "framer-motion";
-import { AlertTriangle, Package, TrendingUp } from "lucide-react";
-import { useState } from "react";
+import { AlertTriangle, Package, TrendingUp, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { DashboardHeader } from "../product/components/DashboardHeader";
 import { EmptyState } from "../product/components/EmptyState";
 import { ProductForm } from "../product/components/ProductForm";
@@ -171,7 +171,8 @@ import type { Product } from "../../types/types";
 type ModalState =
   | { mode: "closed" }
   | { mode: "add" }
-  | { mode: "edit"; product: Product };
+  | { mode: "edit"; product: Product }
+  | { mode: "delete"; product: Product };
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -224,14 +225,31 @@ const statCards = (products: Product[]) => [
 ];
 
 export default function Dashboard() {
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState(search);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1);
+    }, 500);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [search]);
+
   const {
     products,
+    pagination,
     isLoading,
     isError,
     addProduct,
     editProduct,
     removeProduct,
-  } = useProducts();
+  } = useProducts({ page, limit, search: debouncedSearch });
   const [modal, setModal] = useState<ModalState>({ mode: "closed" });
 
   const openAdd = () => setModal({ mode: "add" });
@@ -239,19 +257,45 @@ export default function Dashboard() {
   const closeModal = () => setModal({ mode: "closed" });
 
   const handleSubmit = async (values: ProductFormValues) => {
-    if (modal.mode === "add") await addProduct.mutateAsync(values);
-    else if (modal.mode === "edit")
-      await editProduct.mutateAsync({ id: modal.product.id, payload: values });
+    if (modal.mode === "add") {
+      await addProduct.mutateAsync(values);
+    } else if (modal.mode === "edit") {
+      // Use Mongo _id for API calls
+      await editProduct.mutateAsync({
+        id: modal.product._id,
+        payload: values,
+      });
+    }
     closeModal();
   };
 
   const handleDelete = (product: Product) => {
-    if (window.confirm(`Delete "${product.name}"? This cannot be undone.`))
-      removeProduct.mutate(product.id);
+    setModal({ mode: "delete", product });
   };
 
   const isSubmitting = addProduct.isPending || editProduct.isPending;
   const stats = statCards(products);
+
+  const total = pagination?.total ?? products.length;
+  const totalPages = pagination?.totalPages ?? 1;
+
+  const canGoPrev = page > 1;
+  const canGoNext = page < totalPages;
+
+  const pagesToShow = (() => {
+    const pages: number[] = [];
+    const maxDisplayed = 5;
+    const half = Math.floor(maxDisplayed / 2);
+    let start = Math.max(1, page - half);
+    let end = Math.min(totalPages, start + maxDisplayed - 1);
+    if (end - start + 1 < maxDisplayed) {
+      start = Math.max(1, end - maxDisplayed + 1);
+    }
+    for (let p = start; p <= end; p += 1) {
+      pages.push(p);
+    }
+    return pages;
+  })();
 
   return (
     <div className="min-h-screen bg-[#f8f7ff] font-sans">
@@ -262,7 +306,11 @@ export default function Dashboard() {
       </div>
 
       {/* ── Standalone header component ── */}
-      <DashboardHeader onAddProduct={openAdd} />
+      <DashboardHeader
+        onAddProduct={openAdd}
+        search={search}
+        onSearchChange={setSearch}
+      />
 
       <main className="relative mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
         <AnimatePresence mode="wait">
@@ -346,12 +394,69 @@ export default function Dashboard() {
                 {products.length === 0 ? (
                   <EmptyState onAdd={openAdd} />
                 ) : (
-                  <ProductTable
-                    products={products}
-                    onEdit={openEdit}
-                    onDelete={handleDelete}
-                    isDeleting={removeProduct.isPending}
-                  />
+                  <>
+                    <ProductTable
+                      products={products}
+                      onEdit={openEdit}
+                      onDelete={handleDelete}
+                      isDeleting={removeProduct.isPending}
+                    />
+
+                    {/* Pagination */}
+                    <motion.div
+                      className="mt-4 flex flex-col items-center justify-between gap-3 rounded-2xl border border-slate-200/80 bg-white px-4 py-3 text-xs text-slate-500 shadow-sm sm:flex-row sm:text-sm"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.25 }}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-slate-700">
+                          Total:
+                        </span>
+                        <span className="rounded-full bg-slate-50 px-2 py-0.5 text-xs font-semibold text-slate-700">
+                          {total} products
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-1 sm:gap-2">
+                        <button
+                          type="button"
+                          disabled={!canGoPrev}
+                          onClick={() => canGoPrev && setPage((p) => p - 1)}
+                          className="rounded-lg border border-slate-200 px-2 py-1 text-xs font-medium text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 sm:px-3"
+                        >
+                          Previous
+                        </button>
+
+                        <div className="flex items-center gap-1">
+                          {pagesToShow.map((p) => (
+                            <button
+                              key={p}
+                              type="button"
+                              onClick={() => setPage(p)}
+                              className={`h-7 w-7 rounded-lg text-xs font-semibold transition ${
+                                p === page
+                                  ? "bg-indigo-600 text-white shadow-sm"
+                                  : "bg-slate-50 text-slate-600 hover:bg-slate-100"
+                              }`}
+                              disabled={p === page}
+                            >
+                              {p}
+                            </button>
+                          ))}
+                        </div>
+
+                        <button
+                          type="button"
+                          disabled={!canGoNext}
+                          onClick={() => canGoNext && setPage((p) => p + 1)}
+                          className="rounded-lg border border-slate-200 px-2 py-1 text-xs font-medium text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 sm:px-3"
+                        >
+                          Next
+                        </button>
+                      </div>
+                    </motion.div>
+                  </>
                 )}
               </motion.div>
             </motion.div>
@@ -361,17 +466,65 @@ export default function Dashboard() {
 
       <ProductModal
         isOpen={modal.mode !== "closed"}
-        title={modal.mode === "edit" ? "Edit Product" : "Add New Product"}
+        title={
+          modal.mode === "edit"
+            ? "Edit Product"
+            : modal.mode === "delete"
+              ? "Delete Product"
+              : "Add New Product"
+        }
         onClose={closeModal}
       >
-        <ProductForm
-          key={modal.mode === "edit" ? modal.product.id : "add"}
-          mode={modal.mode === "edit" ? "edit" : "add"}
-          defaultValues={modal.mode === "edit" ? modal.product : undefined}
-          onSubmit={handleSubmit}
-          isSubmitting={isSubmitting}
-          onCancel={closeModal}
-        />
+        {modal.mode === "delete" && modal.product ? (
+          <div className="space-y-4">
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 rounded-full bg-red-50 p-2">
+                <Trash2 className="h-4 w-4 text-red-500" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-slate-900">
+                  Delete “{modal.product.name}”?
+                </p>
+                <p className="mt-1 text-xs text-slate-500">
+                  This action cannot be undone. The product and its inventory
+                  data will be permanently removed.
+                </p>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={closeModal}
+                className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  removeProduct.mutate(modal.product._id);
+                  closeModal();
+                }}
+                className="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-700"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        ) : (
+          <ProductForm
+            key={
+              modal.mode === "edit"
+                ? modal.product?.id || modal.product?._id
+                : "add"
+            }
+            mode={modal.mode === "edit" ? "edit" : "add"}
+            defaultValues={modal.mode === "edit" ? modal.product : undefined}
+            onSubmit={handleSubmit}
+            isSubmitting={isSubmitting}
+            onCancel={closeModal}
+          />
+        )}
       </ProductModal>
     </div>
   );

@@ -23,3 +23,15 @@ export interface SafeProduct {
   quantity: number;
   createdAt: Date;
 }
+
+export interface ProductPagination {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface PaginatedProducts {
+  products: SafeProduct[];
+  pagination: ProductPagination;
+}

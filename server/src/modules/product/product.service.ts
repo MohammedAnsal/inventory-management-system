@@ -3,6 +3,7 @@ import {
   CreateProductInput,
   UpdateProductInput,
   SafeProduct,
+  PaginatedProducts,
 } from "./product.types";
 import { AppError } from "../../utils/custom.error";
 import { HttpStatus } from "../../enums/http.status";
@@ -33,16 +34,53 @@ export const createProduct = async (
 };
 
 /**
- * GET ALL PRODUCTS
+ * GET ALL PRODUCTS (PAGINATED)
  */
 export const getAllProducts = async (
   userId: string,
-): Promise<SafeProduct[]> => {
-  const products = await Product.find({ createdBy: userId }).sort({
-    createdAt: -1,
-  });
+  page = 1,
+  limit = 10,
+  search?: string,
+): Promise<PaginatedProducts> => {
+  const safePage = Number.isFinite(page) && page > 0 ? Math.floor(page) : 1;
+  const safeLimit =
+    Number.isFinite(limit) && limit > 0 && limit <= 100
+      ? Math.floor(limit)
+      : 10;
 
-  return products.map(toSafeProduct);
+  const filter: Record<string, unknown> = {
+    createdBy: userId,
+  };
+
+  if (search && search.trim()) {
+    filter.name = {
+      $regex: search.trim(),
+      $options: "i",
+    };
+  }
+
+  const skip = (safePage - 1) * safeLimit;
+
+  const [products, total] = await Promise.all([
+    Product.find(filter)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(safeLimit),
+    Product.countDocuments(filter),
+  ]);
+
+  const totalPages =
+    safeLimit > 0 ? Math.max(1, Math.ceil(total / safeLimit)) : 1;
+
+  return {
+    products: products.map(toSafeProduct),
+    pagination: {
+      total,
+      page: safePage,
+      limit: safeLimit,
+      totalPages,
+    },
+  };
 };
 
 /**
