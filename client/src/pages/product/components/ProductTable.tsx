@@ -1,104 +1,3 @@
-// import { Pencil, Trash2 } from "lucide-react";
-// import type { Product } from "../../../types/types";
-
-// interface ProductTableProps {
-//   products: Product[];
-//   onEdit: (product: Product) => void;
-//   onDelete: (product: Product) => void;
-//   isDeleting: boolean;
-// }
-
-// function formatCurrency(value: number) {
-//   return new Intl.NumberFormat("en-US", {
-//     style: "currency",
-//     currency: "USD",
-//   }).format(value);
-// }
-
-// function formatDate(iso: string) {
-//   return new Date(iso).toLocaleDateString("en-US", {
-//     year: "numeric",
-//     month: "short",
-//     day: "numeric",
-//   });
-// }
-
-// export function ProductTable({
-//   products,
-//   onEdit,
-//   onDelete,
-//   isDeleting,
-// }: ProductTableProps) {
-//   return (
-//     <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
-//       <table className="min-w-full divide-y divide-slate-100 text-sm">
-//         <thead>
-//           <tr className="bg-slate-50">
-//             {["Name", "Price", "Quantity", "Created At", "Actions"].map((h) => (
-//               <th
-//                 key={h}
-//                 className="whitespace-nowrap px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500"
-//               >
-//                 {h}
-//               </th>
-//             ))}
-//           </tr>
-//         </thead>
-//         <tbody className="divide-y divide-slate-100">
-//           {products.map((product) => (
-//             <tr
-//               key={product.id}
-//               className="transition-colors hover:bg-slate-50/60"
-//             >
-//               <td className="px-5 py-4 font-medium text-slate-800">
-//                 {product.name}
-//               </td>
-//               <td className="px-5 py-4 text-slate-600">
-//                 {formatCurrency(product.price)}
-//               </td>
-//               <td className="px-5 py-4">
-//                 <span
-//                   className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-//                     product.quantity === 0
-//                       ? "bg-red-50 text-red-600"
-//                       : product.quantity < 10
-//                         ? "bg-amber-50 text-amber-600"
-//                         : "bg-emerald-50 text-emerald-700"
-//                   }`}
-//                 >
-//                   {product.quantity}
-//                 </span>
-//               </td>
-//               <td className="px-5 py-4 text-slate-500">
-//                 {formatDate(product.createdAt)}
-//               </td>
-//               <td className="px-5 py-4">
-//                 <div className="flex items-center gap-2">
-//                   <button
-//                     onClick={() => onEdit(product)}
-//                     className="rounded-lg border border-slate-200 p-1.5 text-slate-500 transition hover:border-indigo-300 hover:text-indigo-600"
-//                     title="Edit"
-//                   >
-//                     <Pencil className="h-3.5 w-3.5" />
-//                   </button>
-//                   <button
-//                     onClick={() => onDelete(product)}
-//                     disabled={isDeleting}
-//                     className="rounded-lg border border-slate-200 p-1.5 text-slate-500 transition hover:border-red-300 hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-50"
-//                     title="Delete"
-//                   >
-//                     <Trash2 className="h-3.5 w-3.5" />
-//                   </button>
-//                 </div>
-//               </td>
-//             </tr>
-//           ))}
-//         </tbody>
-//       </table>
-//     </div>
-//   );
-// }
-
 import { motion, AnimatePresence } from "framer-motion";
 import { Pencil, Trash2 } from "lucide-react";
 import type { Product } from "../../../types/types";
@@ -111,9 +10,9 @@ interface ProductTableProps {
 }
 
 function formatCurrency(value: number) {
-  return new Intl.NumberFormat("en-US", {
+  return new Intl.NumberFormat("en-IN", {
     style: "currency",
-    currency: "USD",
+    currency: "INR",
   }).format(value);
 }
 

@@ -34,7 +34,7 @@ export const createProduct = async (
 };
 
 /**
- * GET ALL PRODUCTS (PAGINATED)
+ * GET ALL PRODUCTS
  */
 export const getAllProducts = async (
   userId: string,

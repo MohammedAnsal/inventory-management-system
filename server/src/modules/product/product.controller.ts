@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import { Response, NextFunction } from "express";
 import { createProductSchema, updateProductSchema } from "./product.schema";
 import * as productService from "./product.service";
 import { HttpStatus } from "../../enums/http.status";

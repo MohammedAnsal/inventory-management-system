@@ -3,7 +3,6 @@ import axios from "axios";
 
 const publicApi = publicAxiosInstance;
 
-// Extracts the most useful error message from an Axios error
 export function extractErrorMessage(error: unknown, fallback: string): string {
   if (axios.isAxiosError(error)) {
     return (

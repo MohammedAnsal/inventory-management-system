@@ -1,161 +1,3 @@
-// import { motion } from "framer-motion";
-// import { Plus } from "lucide-react";
-// import { useState } from "react";
-// import { EmptyState } from "../product/components/EmptyState";
-// import { ProductForm } from "../product/components/ProductForm";
-// import type { ProductFormValues } from "../product/components/ProductForm";
-// import { ProductModal } from "../product/components/ProductModal";
-// import { ProductTable } from "../product/components/ProductTable";
-// import { useProducts } from "../../hooks/useProducts";
-// import type { Product } from "../../types/types";
-
-// type ModalState =
-//   | { mode: "closed" }
-//   | { mode: "add" }
-//   | { mode: "edit"; product: Product };
-
-// export default function Dashboard() {
-//   const {
-//     products,
-//     isLoading,
-//     isError,
-//     addProduct,
-//     editProduct,
-//     removeProduct,
-//   } = useProducts();
-//   const [modal, setModal] = useState<ModalState>({ mode: "closed" });
-
-//   const openAdd = () => setModal({ mode: "add" });
-//   const openEdit = (product: Product) => setModal({ mode: "edit", product });
-//   const closeModal = () => setModal({ mode: "closed" });
-
-//   const handleSubmit = async (values: ProductFormValues) => {
-//     if (modal.mode === "add") {
-//       await addProduct.mutateAsync(values);
-//     } else if (modal.mode === "edit") {
-//       await editProduct.mutateAsync({ id: modal.product.id, payload: values });
-//     }
-//     closeModal();
-//   };
-
-//   const handleDelete = (product: Product) => {
-//     const confirmed = window.confirm(
-//       `Are you sure you want to delete "${product.name}"? This action cannot be undone.`,
-//     );
-//     if (confirmed) removeProduct.mutate(product.id);
-//   };
-
-//   const isSubmitting = addProduct.isPending || editProduct.isPending;
-
-//   return (
-//     <div className="min-h-screen bg-slate-50 font-sans">
-//       {/* Top bar */}
-//       <header className="border-b border-slate-200 bg-white">
-//         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-//           <div>
-//             <p className="text-xs font-medium uppercase tracking-widest text-indigo-500">
-//               Inventory
-//             </p>
-//             <h1 className="text-xl font-bold text-slate-900">
-//               Product Dashboard
-//             </h1>
-//           </div>
-//           <button
-//             onClick={openAdd}
-//             className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-indigo-700 active:scale-95"
-//           >
-//             <Plus className="h-4 w-4" />
-//             Add Product
-//           </button>
-//         </div>
-//       </header>
-
-//       {/* Main */}
-//       <motion.main
-//         className="mx-auto max-w-6xl px-6 py-8"
-//         initial={{ opacity: 0, y: 20 }}
-//         animate={{ opacity: 1, y: 0 }}
-//         transition={{ duration: 0.4 }}
-//       >
-//         {/* Stats bar */}
-//         {products.length > 0 && (
-//           <div className="mb-6 grid grid-cols-3 gap-4">
-//             {[
-//               {
-//                 label: "Total Products",
-//                 value: products.length,
-//               },
-//               {
-//                 label: "Total Inventory Value",
-//                 value: new Intl.NumberFormat("en-US", {
-//                   style: "currency",
-//                   currency: "USD",
-//                 }).format(
-//                   products.reduce((s: number, p: { price: number; quantity: number; }) => s + p.price * p.quantity, 0),
-//                 ),
-//               },
-//               {
-//                 label: "Out of Stock",
-//                 value: products.filter((p: { quantity: number; }) => p.quantity === 0).length,
-//               },
-//             ].map((stat) => (
-//               <div
-//                 key={stat.label}
-//                 className="rounded-xl border border-slate-200 bg-white px-5 py-4 shadow-sm"
-//               >
-//                 <p className="text-xs font-medium text-slate-500">
-//                   {stat.label}
-//                 </p>
-//                 <p className="mt-1 text-2xl font-bold text-slate-900">
-//                   {stat.value}
-//                 </p>
-//               </div>
-//             ))}
-//           </div>
-//         )}
-
-//         {/* Content */}
-//         {isLoading ? (
-//           <div className="flex items-center justify-center py-32">
-//             <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-100 border-t-indigo-600" />
-//           </div>
-//         ) : isError ? (
-//           <div className="rounded-xl border border-red-100 bg-red-50 px-6 py-10 text-center">
-//             <p className="text-sm font-medium text-red-600">
-//               Failed to load products. Please try again.
-//             </p>
-//           </div>
-//         ) : products.length === 0 ? (
-//           <EmptyState onAdd={openAdd} />
-//         ) : (
-//           <ProductTable
-//             products={products}
-//             onEdit={openEdit}
-//             onDelete={handleDelete}
-//             isDeleting={removeProduct.isPending}
-//           />
-//         )}
-//       </motion.main>
-
-//       {/* Modal */}
-//       <ProductModal
-//         isOpen={modal.mode !== "closed"}
-//         title={modal.mode === "edit" ? "Edit Product" : "Add New Product"}
-//         onClose={closeModal}
-//       >
-//         <ProductForm
-//           key={modal.mode === "edit" ? modal.product.id : "add"}
-//           mode={modal.mode === "edit" ? "edit" : "add"}
-//           defaultValues={modal.mode === "edit" ? modal.product : undefined}
-//           onSubmit={handleSubmit}
-//           isSubmitting={isSubmitting}
-//           onCancel={closeModal}
-//         />
-//       </ProductModal>
-//     </div>
-//   );
-// }
-
 import { AnimatePresence, motion } from "framer-motion";
 import { AlertTriangle, Package, TrendingUp, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -203,9 +45,9 @@ const statCards = (products: Product[]) => [
   },
   {
     label: "Inventory Value",
-    value: new Intl.NumberFormat("en-US", {
+    value: new Intl.NumberFormat("en-IN", {
       style: "currency",
-      currency: "USD",
+      currency: "INR",
     }).format(products.reduce((s, p) => s + p.price * p.quantity, 0)),
     icon: TrendingUp,
     color: "from-emerald-400 to-teal-500",
@@ -260,7 +102,6 @@ export default function Dashboard() {
     if (modal.mode === "add") {
       await addProduct.mutateAsync(values);
     } else if (modal.mode === "edit") {
-      // Use Mongo _id for API calls
       await editProduct.mutateAsync({
         id: modal.product._id,
         payload: values,

@@ -1,6 +1,3 @@
-import { Request } from "express";
-import { IUser } from "../../models/user.model";
-
 export interface CreateProductInput {
   name: string;
   description?: string;

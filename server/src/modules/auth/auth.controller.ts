@@ -92,45 +92,6 @@ export const login = async (req: Request, res: Response) => {
 /**
  * Verify Email Controller
  */
-// export const verifyEmail = async (req: Request, res: Response) => {
-//   try {
-//     const email = req.query.email as string;
-//     const token = req.query.token as string;
-
-//     if (!email || !token) {
-//       return res.status(HttpStatus.BAD_REQUEST).json({
-//         success: false,
-//         message: "Email and token are required.",
-//       });
-//     }
-
-//     const { user, accessToken, refreshToken } = await verifyUserEmail(
-//       email,
-//       token,
-//     );
-
-//     setCookie(res, "refresh_token", refreshToken);
-
-//     return res.status(HttpStatus.OK).json({
-//       success: true,
-//       message: "Email verified successfully",
-//       user,
-//       accessToken,
-//     });
-//   } catch (error: any) {
-//     if (error instanceof AppError) {
-//       return res.status(error.statusCode).json({
-//         success: false,
-//         message: error.message,
-//       });
-//     }
-
-//     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-//       success: false,
-//       message: responseMessage.ERROR_MESSAGE,
-//     });
-//   }
-// };
 
 export const verifyEmail = async (req: Request, res: Response) => {
   try {
@@ -158,7 +119,6 @@ export const verifyEmail = async (req: Request, res: Response) => {
       accessToken,
     });
   } catch (error: any) {
-    // ✅ AppError — send its message to frontend
     if (error instanceof AppError) {
       return res.status(error.statusCode).json({
         success: false,
@@ -166,7 +126,6 @@ export const verifyEmail = async (req: Request, res: Response) => {
       });
     }
 
-    // ✅ Any other unexpected error — log it and send the actual message in dev
     console.error("Unexpected verifyEmail error:", error);
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       success: false,
@@ -298,9 +257,13 @@ export const me = async (req: AuthRequest, res: Response) => {
   }
 };
 
+/**
+ * Get RefreshToken
+ */
+
 export const refreshToken = async (req: Request, res: Response) => {
   try {
-    const token = req.cookies?.refresh_token; 
+    const token = req.cookies?.refresh_token;
 
     if (!token) {
       return res.status(HttpStatus.FORBIDDEN).json({

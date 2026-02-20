@@ -15,7 +15,6 @@ interface AuthState {
   logout: () => void;
 }
 
-// Initialize from localStorage so auth survives page refresh
 const tokenFromStorage = localStorage.getItem("access-token");
 const userFromStorageRaw = localStorage.getItem("auth-user");
 

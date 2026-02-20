@@ -23,13 +23,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// Health check route
-app.get("/health", (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: "Server is running",
-  });
-});
 
 // API Routes
 app.use("/api/auth", authRoutes);
@@ -43,7 +36,6 @@ app.use((req, res) => {
   });
 });
 
-// Global error handler (must be last)
 app.use(errorHandler);
 
 export default app;

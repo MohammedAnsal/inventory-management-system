@@ -128,48 +128,6 @@ export const loginUser = async (
 /**
  * VERIFY EMAIL
  */
-// export const verifyUserEmail = async (
-//   email: string,
-//   token: string,
-// ): Promise<{
-//   user: SafeUserData;
-//   accessToken: string;
-//   refreshToken: string;
-// }> => {
-//   const user = await User.findOne({ email });
-
-//   if (!user) {
-//     throw new AppError(HttpStatus.NOT_FOUND, "User not found");
-//   }
-
-//   if (user.is_verified) {
-//     throw new AppError(HttpStatus.BAD_REQUEST, "Email already verified");
-//   }
-
-//   const decodedEmail = verifyEmailToken(token);
-
-//   if (decodedEmail !== email) {
-//     throw new AppError(HttpStatus.UNAUTHORIZED, "Invalid or expired token");
-//   }
-
-//   user.is_verified = true;
-//   await user.save();
-
-//   const payload: JWTPayload = {
-//     userId: user._id.toString(),
-//     email: user.email,
-//   };
-
-//   const accessToken = generateAccessToken(payload);
-//   const refreshToken = generateRefreshToken(payload);
-
-//   return {
-//     user: toSafeUserData(user),
-//     accessToken,
-//     refreshToken,
-//   };
-// };
-
 export const verifyUserEmail = async (
   email: string,
   token: string,
@@ -188,12 +146,10 @@ export const verifyUserEmail = async (
     throw new AppError(HttpStatus.BAD_REQUEST, "Email is already verified.");
   }
 
-  // ✅ Catch JWT errors specifically so they become proper AppErrors
   let decodedEmail: string;
   try {
     decodedEmail = verifyEmailToken(token);
   } catch (err: any) {
-    // JsonWebTokenError, TokenExpiredError, etc.
     const isExpired = err?.name === "TokenExpiredError";
     throw new AppError(
       HttpStatus.UNAUTHORIZED,

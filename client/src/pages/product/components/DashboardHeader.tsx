@@ -1,12 +1,14 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { LogOut, Package, Plus } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { useShallow } from "zustand/react/shallow";
 import { useAuthStore } from "../../../store/useAuthStore";
 
 interface DashboardHeaderProps {
   onAddProduct: () => void;
+  search: string;
+  onSearchChange: (value: string) => void;
 }
 
 function getInitials(name: string | null): string {
@@ -32,7 +34,11 @@ function getAvatarColor(name: string | null): string {
   return colors[index];
 }
 
-export function DashboardHeader({ onAddProduct }: DashboardHeaderProps) {
+export function DashboardHeader({
+  onAddProduct,
+  search,
+  onSearchChange,
+}: DashboardHeaderProps) {
   const navigate = useNavigate();
   const { fullName, email, logout } = useAuthStore(
     useShallow((state) => ({
@@ -73,6 +79,10 @@ export function DashboardHeader({ onAddProduct }: DashboardHeaderProps) {
   const initials = getInitials(fullName);
   const avatarGradient = getAvatarColor(fullName);
 
+  const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
+    onSearchChange(e.target.value);
+  };
+
   return (
     <motion.header
       className="sticky top-0 z-30 border-b border-white/80 bg-white/70 backdrop-blur-xl"
@@ -83,8 +93,8 @@ export function DashboardHeader({ onAddProduct }: DashboardHeaderProps) {
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6 sm:py-4">
         {/* Logo / Brand */}
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 shadow-md shadow-indigo-200">
-            <Package className="h-[18px] w-[18px] text-white" strokeWidth={2} />
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-violet-500 to-indigo-600 shadow-md shadow-indigo-200">
+            <Package className="h-4.5 w-4.5 text-white" strokeWidth={2} />
           </div>
           <div>
             <p className="hidden text-[10px] font-bold uppercase tracking-[0.2em] text-indigo-400 sm:block">
@@ -98,10 +108,20 @@ export function DashboardHeader({ onAddProduct }: DashboardHeaderProps) {
 
         {/* Right side */}
         <div className="flex items-center gap-3">
+          {/* Search (desktop) */}
+          <div className="hidden items-center sm:flex">
+            <input
+              type="text"
+              value={search}
+              onChange={handleSearchChange}
+              placeholder="Search products…"
+              className="w-44 rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-700 outline-none transition hover:border-slate-300 focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
+            />
+          </div>
           {/* Add product button */}
           <motion.button
             onClick={onAddProduct}
-            className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 px-3 py-2 text-xs font-semibold text-white shadow-lg shadow-indigo-200/60 sm:gap-2 sm:px-4 sm:text-sm"
+            className="flex items-center gap-1.5 rounded-xl bg-linear-to-r from-violet-600 to-indigo-600 px-3 py-2 text-xs font-semibold text-white shadow-lg shadow-indigo-200/60 sm:gap-2 sm:px-4 sm:text-sm"
             whileHover={{
               scale: 1.03,
               boxShadow: "0 8px 25px rgba(99,102,241,0.4)",
@@ -124,12 +144,12 @@ export function DashboardHeader({ onAddProduct }: DashboardHeaderProps) {
             >
               {/* Avatar */}
               <div
-                className={`flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br ${avatarGradient} text-xs font-bold text-white shadow-sm`}
+                className={`flex h-8 w-8 items-center justify-center rounded-lg bg-linear-to-br ${avatarGradient} text-xs font-bold text-white shadow-sm`}
               >
                 {initials}
               </div>
               {/* Name */}
-              <span className="hidden max-w-[100px] truncate text-sm font-semibold text-slate-700 sm:block">
+              <span className="hidden max-w-25 truncate text-sm font-semibold text-slate-700 sm:block">
                 {fullName ?? "User"}
               </span>
               {/* Chevron */}
@@ -162,10 +182,10 @@ export function DashboardHeader({ onAddProduct }: DashboardHeaderProps) {
                 >
                   <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-xl shadow-slate-200/60 ring-1 ring-black/5">
                     {/* User info section */}
-                    <div className="bg-gradient-to-br from-slate-50 to-indigo-50/40 px-4 py-4">
+                    <div className="bg-linear-to-br from-slate-50 to-indigo-50/40 px-4 py-4">
                       <div className="flex items-center gap-3">
                         <div
-                          className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${avatarGradient} text-sm font-bold text-white shadow-md`}
+                          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-linear-to-br ${avatarGradient} text-sm font-bold text-white shadow-md`}
                         >
                           {initials}
                         </div>

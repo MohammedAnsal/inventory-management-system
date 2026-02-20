@@ -5,10 +5,11 @@ import {
   deleteProduct,
   getProducts,
   updateProduct,
+  extractErrorMessage,
   type GetProductsParams,
   type GetProductsResponse,
+  type ProductPayload,
 } from "../services/api/product";
-import type { ProductPayload } from "../services/api/product";
 
 const PRODUCTS_KEY = ({
   page,
@@ -25,16 +26,11 @@ interface UseProductsParams {
 export function useProducts({ page, limit, search }: UseProductsParams) {
   const queryClient = useQueryClient();
 
-  const {
-    data,
-    isLoading,
-    isError,
-    error,
-  } = useQuery({
+  const { data, isLoading, isError, error } = useQuery<GetProductsResponse>({
     queryKey: PRODUCTS_KEY({ page, search }),
-    queryFn: (): Promise<GetProductsResponse> =>
-      getProducts({ page, limit, search }),
-    keepPreviousData: true,
+    queryFn: () => getProducts({ page, limit, search }),
+    placeholderData: (previousData: GetProductsResponse | undefined) =>
+      previousData, // ✅ v5 syntax
   });
 
   const invalidate = () =>
@@ -48,7 +44,8 @@ export function useProducts({ page, limit, search }: UseProductsParams) {
       toast.success("Product created successfully.");
       invalidate();
     },
-    onError: () => toast.error("Failed to create product."),
+    onError: (error) =>
+      toast.error(extractErrorMessage(error, "Failed to create product.")),
   });
 
   const editProduct = useMutation({
@@ -58,7 +55,8 @@ export function useProducts({ page, limit, search }: UseProductsParams) {
       toast.success("Product updated successfully.");
       invalidate();
     },
-    onError: () => toast.error("Failed to update product."),
+    onError: (error) =>
+      toast.error(extractErrorMessage(error, "Failed to update product.")),
   });
 
   const removeProduct = useMutation({
@@ -67,15 +65,13 @@ export function useProducts({ page, limit, search }: UseProductsParams) {
       toast.success("Product deleted.");
       invalidate();
     },
-    onError: () => toast.error("Failed to delete product."),
+    onError: (error) =>
+      toast.error(extractErrorMessage(error, "Failed to delete product.")),
   });
 
-  const products = data?.data ?? [];
-  const pagination = data?.pagination;
-
   return {
-    products,
-    pagination,
+    products: data?.data ?? [],
+    pagination: data?.pagination,
     isLoading,
     isError,
     error,

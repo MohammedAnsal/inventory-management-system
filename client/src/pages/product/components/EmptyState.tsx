@@ -1,31 +1,3 @@
-// import { PackageOpen } from "lucide-react";
-
-// interface EmptyStateProps {
-//   onAdd: () => void;
-// }
-
-// export function EmptyState({ onAdd }: EmptyStateProps) {
-//   return (
-//     <div className="flex flex-col items-center justify-center py-24 text-center">
-//       <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100">
-//         <PackageOpen className="h-8 w-8 text-slate-400" strokeWidth={1.5} />
-//       </div>
-//       <h3 className="mb-1 text-base font-semibold text-slate-800">
-//         No products yet
-//       </h3>
-//       <p className="mb-6 max-w-xs text-sm text-slate-500">
-//         Your inventory is empty. Add your first product to get started.
-//       </p>
-//       <button
-//         onClick={onAdd}
-//         className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700 active:scale-95"
-//       >
-//         Add Product
-//       </button>
-//     </div>
-//   );
-// }
-
 import { motion } from "framer-motion";
 import { PackageOpen, Plus } from "lucide-react";
 

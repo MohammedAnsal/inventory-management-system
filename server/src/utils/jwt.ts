@@ -51,11 +51,11 @@ export const verifyRefreshToken = (token: string): JWTPayload | null => {
 
 export const verifyEmailToken = (token: string): string => {
   try {
-    const decoded = jwt.verify(token, VERIFY_EMAIL_SECRET) as { email: string }; // ✅ use constant
+    const decoded = jwt.verify(token, VERIFY_EMAIL_SECRET) as { email: string };
     return decoded.email;
   } catch (error: any) {
     if (error?.name === "TokenExpiredError") {
-      throw new Error("TokenExpiredError"); // ✅ service catches this for a friendly message
+      throw new Error("TokenExpiredError");
     }
     throw new Error("Invalid verification token");
   }
