@@ -9,11 +9,11 @@ export interface JWTPayload {
 }
 
 const ACCESS_TOKEN =
-  process.env.ACCESS_TOKE ||
+  process.env.JWT_ACCESS_SECRET ||
   "5b31b8a136aea4e77156c90072185cc0bc2f31e784129b569f8b8dc2082ce8cd";
 
 const REFRESH_SECRET =
-  process.env.REFRESH_SECRET ||
+  process.env.JWT_REFRESH_SECRET ||
   "39769aee2efe8ef7df54a4c4e4f0f5161e657fd0c8cffbae50afee9c6df53cc1";
 
 const VERIFY_EMAIL_SECRET =
@@ -27,32 +27,36 @@ export const generateRefreshToken = (payload: object) => {
   return jwt.sign(payload, REFRESH_SECRET, { expiresIn: "7d" });
 };
 
-//  For generating email verification :-
-
 export const generateEmailVerificationToken = (email: string) => {
-  return jwt.sign({ email }, VERIFY_EMAIL_SECRET, { expiresIn: "1d" });
+  return jwt.sign({ email }, VERIFY_EMAIL_SECRET, { expiresIn: "7d" }); // ✅ 7 days
 };
-
-//  Verify token :-
 
 export const verifyAccessToken = (token: string): JWTPayload | null => {
   try {
     const decoded = jwt.verify(token, ACCESS_TOKEN) as JWTPayload;
     return decoded;
-  } catch (error) {
+  } catch {
     return null;
   }
 };
 
-//  Verify Email Token :-
+export const verifyRefreshToken = (token: string): JWTPayload | null => {
+  try {
+    const decoded = jwt.verify(token, REFRESH_SECRET) as JWTPayload;
+    return decoded;
+  } catch {
+    return null;
+  }
+};
 
 export const verifyEmailToken = (token: string): string => {
   try {
-    const decoded = jwt.verify(token, process.env.VERIFY_EMAIL_SECRET!) as {
-      email: string;
-    };
+    const decoded = jwt.verify(token, VERIFY_EMAIL_SECRET) as { email: string }; // ✅ use constant
     return decoded.email;
-  } catch (error) {
-    throw new Error("Invalid or expired verification token");
+  } catch (error: any) {
+    if (error?.name === "TokenExpiredError") {
+      throw new Error("TokenExpiredError"); // ✅ service catches this for a friendly message
+    }
+    throw new Error("Invalid verification token");
   }
 };

@@ -1,58 +1,39 @@
-import { Response, NextFunction } from "express";
+import {Response, NextFunction } from "express";
 import { verifyAccessToken } from "../utils/jwt";
-import { AuthRequest } from "../modules/auth/auth.types";
-import { User } from "../models/user.model";
 import { HttpStatus, responseMessage } from "../enums/http.status";
+import { JwtPayload } from "jsonwebtoken";
+import { AuthRequest } from "../interface/api";
 
-/**
- * Middleware to verify JWT token from cookie and attach user to request
- */
-export const authenticate = async (
+export const authMiddleware = async (
   req: AuthRequest,
   res: Response,
-  next: NextFunction
-): Promise<void> => {
+  next: NextFunction,
+) => {
   try {
-    // Get token from cookie
-    const token = req.cookies?.accessToken;
+    const authHeader = req.headers["authorization"];
+    const token = authHeader && authHeader.split(" ")[1]; 
 
     if (!token) {
-      res.status(HttpStatus.UNAUTHORIZED).json({
-        success: false,
-        message: responseMessage.LOGIN_REQUIRED,
-      });
-      return;
+      return res
+        .status(HttpStatus.UNAUTHORIZED)
+        .json({ message: "Access denied. No token provided" });
     }
 
-    // Verify token
-    const decoded = verifyAccessToken(token);
+    const decodedToken = verifyAccessToken(token) as JwtPayload;
+    const userId = decodedToken.userId;
 
-    if (!decoded) {
-      res.status(HttpStatus.UNAUTHORIZED).json({
-        success: false,
-        message: responseMessage.TOKEN_ACCESS,
-      });
-      return;
+    if (!userId) {
+      return res
+        .status(HttpStatus.UNAUTHORIZED)
+        .json({ message: responseMessage.ACCESS_DENIED });
     }
 
-    // Find user by ID
-    const user = await User.findById(decoded.userId).select("-password");
-
-    if (!user) {
-      res.status(HttpStatus.UNAUTHORIZED).json({
-        success: false,
-        message: responseMessage.TOKEN_ACCESS,
-      });
-      return;
-    }
-
-    // Attach user to request
-    req.user = user;
-    next();
+    req.user = { id: userId };
+    return next();
   } catch (error) {
-    res.status(HttpStatus.UNAUTHORIZED).json({
-      success: false,
-      message: responseMessage.TOKEN_ACCESS,
-    });
+    console.error("Auth Middleware Error:", (error as Error).message);
+    return res
+      .status(HttpStatus.UNAUTHORIZED)
+      .json({ message: (error as Error).message });
   }
 };

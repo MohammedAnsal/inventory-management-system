@@ -4,15 +4,17 @@ import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import { errorHandler } from "./middleware/error.middleware";
 import authRoutes from "./modules/auth/auth.route";
+import productRoutes from "./modules/product/product.route";
 
 dotenv.config();
 
 const app: Express = express();
 
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || "http://localhost:3000",
+  origin: process.env.FRONTEND_URL,
   credentials: true,
-  optionsSuccessStatus: 200,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+  allowedHeaders: ["Content-Type", "Authorization"],
 };
 
 // Middleware
@@ -31,6 +33,7 @@ app.get("/health", (req, res) => {
 
 // API Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/products", productRoutes);
 
 // 404 handler
 app.use((req, res) => {

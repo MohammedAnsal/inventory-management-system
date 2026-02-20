@@ -2,7 +2,7 @@ import nodemailer from "nodemailer";
 
 const EMAIL_USER = process.env.EMAIL_USER;
 const EMAIL_PASS = process.env.EMAIL_PASS;
-const BASE_URL = process.env.BACKEND_URL || "http://localhost:5000";
+const BASE_URL = process.env.FRONTEND_URL || "http://localhost:5005";
 
 if (!EMAIL_USER || !EMAIL_PASS) {
   throw new Error("EMAIL_USER and EMAIL_PASS must be set in environment.");
@@ -24,7 +24,7 @@ interface SendVerificationEmailOptions {
 
 function buildVerificationHtml(options: SendVerificationEmailOptions): string {
   const { email, token, name = "there" } = options;
-  const verifyUrl = `${BASE_URL}/api/auth/verify-email?email=${encodeURIComponent(email)}&token=${token}`;
+  const verifyUrl = `${BASE_URL}/auth/verify-email?email=${encodeURIComponent(email)}&token=${token}`;
 
   return `
 <!DOCTYPE html>

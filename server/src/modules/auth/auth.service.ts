@@ -10,6 +10,7 @@ import {
   generateEmailVerificationToken,
   verifyEmailToken,
   JWTPayload,
+  verifyRefreshToken,
 } from "../../utils/jwt";
 import { sendVerificationEmail } from "../../utils/email";
 import { SignUpInput, SignInInput } from "./auth.schema";
@@ -35,7 +36,14 @@ const toSafeUserData = (user: IUser): SafeUserData => ({
 export const registerUser = async (
   input: SignUpInput,
 ): Promise<{ message: string }> => {
-  const { fullName, email, password } = input;
+  const { fullName, email, password, confirmPassword } = input;
+
+  if (password !== confirmPassword) {
+    throw new AppError(
+      HttpStatus.BAD_REQUEST,
+      "Password and compare password do not match.",
+    );
+  }
 
   const existingUser = await User.findOne({ email });
 
@@ -120,6 +128,48 @@ export const loginUser = async (
 /**
  * VERIFY EMAIL
  */
+// export const verifyUserEmail = async (
+//   email: string,
+//   token: string,
+// ): Promise<{
+//   user: SafeUserData;
+//   accessToken: string;
+//   refreshToken: string;
+// }> => {
+//   const user = await User.findOne({ email });
+
+//   if (!user) {
+//     throw new AppError(HttpStatus.NOT_FOUND, "User not found");
+//   }
+
+//   if (user.is_verified) {
+//     throw new AppError(HttpStatus.BAD_REQUEST, "Email already verified");
+//   }
+
+//   const decodedEmail = verifyEmailToken(token);
+
+//   if (decodedEmail !== email) {
+//     throw new AppError(HttpStatus.UNAUTHORIZED, "Invalid or expired token");
+//   }
+
+//   user.is_verified = true;
+//   await user.save();
+
+//   const payload: JWTPayload = {
+//     userId: user._id.toString(),
+//     email: user.email,
+//   };
+
+//   const accessToken = generateAccessToken(payload);
+//   const refreshToken = generateRefreshToken(payload);
+
+//   return {
+//     user: toSafeUserData(user),
+//     accessToken,
+//     refreshToken,
+//   };
+// };
+
 export const verifyUserEmail = async (
   email: string,
   token: string,
@@ -131,17 +181,33 @@ export const verifyUserEmail = async (
   const user = await User.findOne({ email });
 
   if (!user) {
-    throw new AppError(HttpStatus.NOT_FOUND, "User not found");
+    throw new AppError(HttpStatus.NOT_FOUND, "User not found.");
   }
 
   if (user.is_verified) {
-    throw new AppError(HttpStatus.BAD_REQUEST, "Email already verified");
+    throw new AppError(HttpStatus.BAD_REQUEST, "Email is already verified.");
   }
 
-  const decodedEmail = verifyEmailToken(token);
+  // ✅ Catch JWT errors specifically so they become proper AppErrors
+  let decodedEmail: string;
+  try {
+    decodedEmail = verifyEmailToken(token);
+  } catch (err: any) {
+    // JsonWebTokenError, TokenExpiredError, etc.
+    const isExpired = err?.name === "TokenExpiredError";
+    throw new AppError(
+      HttpStatus.UNAUTHORIZED,
+      isExpired
+        ? "Verification link has expired. Please request a new one."
+        : "Invalid verification link.",
+    );
+  }
 
   if (decodedEmail !== email) {
-    throw new AppError(HttpStatus.UNAUTHORIZED, "Invalid or expired token");
+    throw new AppError(
+      HttpStatus.UNAUTHORIZED,
+      "Verification link does not match this email.",
+    );
   }
 
   user.is_verified = true;
@@ -161,7 +227,6 @@ export const verifyUserEmail = async (
     refreshToken,
   };
 };
-
 /**
  * RESEND VERIFICATION EMAIL
  */
@@ -253,4 +318,30 @@ export const getCurrentUser = async (userId: string): Promise<SafeUserData> => {
   }
 
   return toSafeUserData(user);
+};
+
+export const refreshAccessToken = async (
+  token: string,
+): Promise<{ accessToken: string }> => {
+  const decoded = verifyRefreshToken(token);
+
+  if (!decoded || typeof decoded !== "object" || !("userId" in decoded)) {
+    throw new AppError(
+      HttpStatus.FORBIDDEN,
+      "Invalid or expired refresh token",
+    );
+  }
+
+  const user = await User.findById(decoded.userId);
+
+  if (!user) {
+    throw new AppError(HttpStatus.UNAUTHORIZED, "User not found");
+  }
+
+  const accessToken = generateAccessToken({
+    userId: user._id.toString(),
+    email: user.email,
+  });
+
+  return { accessToken };
 };
