@@ -14,7 +14,7 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   if (!isAuthenticated) {
     return (
       <Navigate
-        to="/auth/login"
+        to="/"
         state={{ from: { pathname: location.pathname } }}
         replace
       />

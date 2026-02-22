@@ -8,6 +8,8 @@ import {
   ArrowRight,
   CheckCircle,
 } from "lucide-react";
+import { useAuthStore } from "../store/useAuthStore";
+import { useNavigate } from "react-router-dom";
 
 const features = [
   {
@@ -72,8 +74,17 @@ const itemVariants = {
 };
 
 const Landing = () => {
+  const { isAuthenticated, logout } = useAuthStore((state) => state);
+
+  const navigate = useNavigate();
+
+  const handleSignOut = () => {
+    logout();
+    navigate("/");
+  };
+
   return (
-    <div className="min-h-screen bg-[#f8f7ff] font-sans text-slate-900 flex flex-col">
+    <div className="min-h-screen overflow-x-hidden bg-[#f8f7ff] font-sans text-slate-900 flex flex-col">
       {/* Decorative blobs */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 h-96 w-96 rounded-full bg-indigo-100/60 blur-3xl" />
@@ -101,21 +112,51 @@ const Landing = () => {
 
           {/* Nav links */}
           <nav className="flex items-center gap-2">
-            <Link
-              to="/auth/login"
-              className="rounded-xl px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
-            >
-              Sign In
-            </Link>
-            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-              <Link
-                to="/auth/register"
-                className="flex items-center gap-1.5 rounded-xl bg-linear-to-r from-violet-600 to-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-200/60"
-              >
-                Get Started
-                <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
-            </motion.div>
+            {isAuthenticated ? (
+              <>
+                <motion.div
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                >
+                  <Link
+                    to="/dashboard"
+                    className="flex items-center gap-1.5 rounded-xl bg-linear-to-r from-violet-600 to-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-200/60"
+                  >
+                    Dashboard
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
+                </motion.div>
+                <motion.button
+                  onClick={handleSignOut}
+                  className="rounded-xl px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-red-50 hover:text-red-500"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.97 }}
+                >
+                  Sign Out
+                </motion.button>
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/auth/login"
+                  className="rounded-xl px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
+                >
+                  Sign In
+                </Link>
+                <motion.div
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                >
+                  <Link
+                    to="/auth/register"
+                    className="flex items-center gap-1.5 rounded-xl bg-linear-to-r from-violet-600 to-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-200/60"
+                  >
+                    Get Started
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
+                </motion.div>
+              </>
+            )}
           </nav>
         </div>
       </motion.header>
@@ -162,23 +203,46 @@ const Landing = () => {
             className="flex flex-col items-center justify-center gap-3 sm:flex-row"
             variants={itemVariants as any}
           >
-            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-              <Link
-                to="/auth/register"
-                className="flex items-center gap-2 rounded-2xl bg-linear-to-r from-violet-600 to-indigo-600 px-7 py-3.5 text-sm font-bold text-white shadow-xl shadow-indigo-200/60"
+            {isAuthenticated ? (
+              <motion.div
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
               >
-                Get Started — It&apos;s Free
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </motion.div>
-            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-              <Link
-                to="/auth/login"
-                className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white/80 px-7 py-3.5 text-sm font-bold text-slate-700 shadow-sm backdrop-blur-sm transition hover:border-indigo-200 hover:bg-white"
-              >
-                Sign In
-              </Link>
-            </motion.div>
+                <Link
+                  to="/dashboard"
+                  className="flex items-center gap-2 rounded-2xl bg-linear-to-r from-violet-600 to-indigo-600 px-7 py-3.5 text-sm font-bold text-white shadow-xl shadow-indigo-200/60"
+                >
+                  Go to Dashboard
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </motion.div>
+            ) : (
+              <>
+                <motion.div
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                >
+                  <Link
+                    to="/auth/register"
+                    className="flex items-center gap-2 rounded-2xl bg-linear-to-r from-violet-600 to-indigo-600 px-7 py-3.5 text-sm font-bold text-white shadow-xl shadow-indigo-200/60"
+                  >
+                    Get Started — It&apos;s Free
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </motion.div>
+                <motion.div
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                >
+                  <Link
+                    to="/auth/login"
+                    className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white/80 px-7 py-3.5 text-sm font-bold text-slate-700 shadow-sm backdrop-blur-sm transition hover:border-indigo-200 hover:bg-white"
+                  >
+                    Sign In
+                  </Link>
+                </motion.div>
+              </>
+            )}
           </motion.div>
 
           {/* Trust badges */}
@@ -312,10 +376,10 @@ const Landing = () => {
             whileTap={{ scale: 0.97 }}
           >
             <Link
-              to="/auth/register"
+              to={isAuthenticated ? "/dashboard" : "/auth/register"}
               className="inline-flex items-center gap-2 rounded-2xl bg-white px-8 py-3.5 text-sm font-bold text-indigo-600 shadow-lg transition hover:shadow-xl"
             >
-              Start for Free
+              {isAuthenticated ? "Go to Dashboard" : "Start for Free"}
               <ArrowRight className="h-4 w-4" />
             </Link>
           </motion.div>
